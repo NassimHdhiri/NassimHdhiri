@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 //import 'package:url_launcher/url_launcher.dart';
-
+import 'package:http/http.dart' as http;
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
 
@@ -9,16 +9,35 @@ class ProfileView extends StatefulWidget {
 }
 
 class _ProfileViewState extends State<ProfileView> {
+
+  Future<bool> deleteProfile(int id) async {
+    try {
+      final response = await http.delete(Uri.parse("http://localhost:3000/api/users/$id"));
+
+      if (response.statusCode == 200) {
+        print('Delete successful!');
+        return true;
+      } else {
+        print('Error in deleting. Status code: ${response.statusCode}');
+        return false; // Indicate failure
+      }
+    } catch (error) {
+      print('Error: $error');
+      return false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    Map<String,dynamic> profile=ModalRoute.of(context)!.settings.arguments as  Map<String,dynamic>;
 
     Color appBarColor = const Color(0xffD9D9D9);
-//    MediaQueryData mediaQueryData = MediaQuery.of(context);
+//  MediaQueryData mediaQueryData = MediaQuery.of(context);
 
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Hdhiri", style: TextStyle(color: Colors.black)),
+        title:  Text(profile['firstName'], style: TextStyle(color: Colors.black)),
         backgroundColor: appBarColor,
         actions: [
           IconButton(
@@ -87,18 +106,18 @@ class _ProfileViewState extends State<ProfileView> {
                     children: [
                       Transform.translate(
                           offset: const Offset(0, 30), // Specify the desired translation values
-                          child: const  CircleAvatar(
-                            backgroundImage: AssetImage("assets/images/nassim.jpeg"),
+                          child:  CircleAvatar(
+                            backgroundImage: NetworkImage(profile['imagePath']),
                             radius: 90,
                           )
                       ), SizedBox(height: 60,),
-                      const Text(
-                        'Hdhiri Mohamed Nassim',
+                       Text(
+                        profile['firstName']+' '+profile['lastName'],
                         style: TextStyle(color: Colors.white,fontSize: 20),
                       ),
                       const SizedBox(height: 12,),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 70.0),
+                      const Padding(
+                      padding:  EdgeInsets.symmetric(horizontal: 70.0),
                       child: Divider(height: 2,),
                     )
                   ,
@@ -107,14 +126,14 @@ class _ProfileViewState extends State<ProfileView> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           IconButton(onPressed: (){
-                            Navigator.pushNamed(context, "/update");
+                            Navigator.pushNamed(context, "/update",arguments: profile);
                             print("update button ");
                           }, icon:Image.asset("assets/images/edit-profile.png" ,width: 35,color: Colors.white,),
                           ),
                           SizedBox(width: 40,),
                           IconButton(
                               onPressed: (){
-                                print("delete");
+                                  deleteProfile(profile['id']);
                               },
                               icon: Icon(Icons.delete,size: 35,color: Colors.redAccent,),
                           )
@@ -131,27 +150,27 @@ class _ProfileViewState extends State<ProfileView> {
                         width: 268,
                         child: Column(
                           children: [
-                             const Padding(
+                               Padding(
                               padding:  EdgeInsets.symmetric(vertical: 5),
                               child:  Column(
                                 children: [
-                                   Row(children: [Text("Account information",style: TextStyle(fontWeight: FontWeight.bold,),)]),
-                                   SizedBox(height: 18),
+                                   const Row(children: [Text("Account information",style: TextStyle(fontWeight: FontWeight.bold,),)]),
+                                   const SizedBox(height: 18),
                                   Column(
                                     children: [
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.center,
                                         children: [
-                                          SizedBox(width: 15,),
+                                          const SizedBox(width: 15,),
                                           Expanded(
                                             child: Row(
                                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                               children: [
-                                                Text('ID'),
+                                                const Text('ID'),
                                                 Row(
                                                   children: [
-                                                    Text('12345678'),
-                                                    SizedBox(width: 22,)
+                                                    Text(profile['id'].toString()),
+                                                    const SizedBox(width: 22,)
                                                   ],
                                                 )
                                               ],
@@ -173,7 +192,7 @@ class _ProfileViewState extends State<ProfileView> {
                                                 SizedBox(width: 22,),
                                                 Flexible(
                                                   child: Text(
-                                                    'hdhirimohamednassim@gmail.com',
+                                                    profile['email'],
                                                     overflow: TextOverflow.ellipsis,
                                                   ),
                                                 ),
@@ -194,7 +213,7 @@ class _ProfileViewState extends State<ProfileView> {
                                                 Text('Tel'),
                                                 Row(
                                                   children: [
-                                                    Text('54 011 448'),
+                                                    Text(profile['tel']),
                                                     SizedBox(width: 22,)
                                                   ],
                                                 )
@@ -230,7 +249,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ],
                             ),
                             const SizedBox(height: 30),
-                            const Column(
+                             Column(
                               children: [
                                  Row(
                                   children: [
@@ -249,7 +268,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('Method'),
                                           Row(
                                             children: [
-                                              Text('paypal'),
+                                              Text(profile['methodOfPayment']),
                                               SizedBox(width: 22,)
                                             ],
                                           )
@@ -270,7 +289,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('COMM RATE'),
                                           Row(
                                             children: [
-                                              Text('5 %'),
+                                              Text('${profile['commRate']} %'),
                                               SizedBox(width: 22,)
                                             ],
                                           )
@@ -303,7 +322,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ],
                             ),
                             const SizedBox(height: 22),
-                            const Column(
+                             Column(
                               children: [
                                  Row(
                                   children: [
@@ -322,7 +341,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('comm pref '),
                                           Row(
                                             children: [
-                                              Text('Mail',style: TextStyle(decoration: TextDecoration.underline,),),
+                                              Text(profile['commPref']),
                                               SizedBox(width: 22,)
                                             ],
                                           )
@@ -334,7 +353,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ],
                             ),
                             const SizedBox(height: 30),
-                            const  Column(
+                              Column(
                               children: [
                                  Row(
                                   children: [
@@ -353,7 +372,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('Gender'),
                                           Row(
                                             children: [
-                                              Text('Male',style: TextStyle(decoration: TextDecoration.underline,),),
+                                              Text(profile['gender']),
                                               SizedBox(width: 22,)
                                             ],
                                           )
@@ -374,7 +393,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('Location'),
                                           Row(
                                             children: [
-                                              Text('Tunis',style: TextStyle(decoration: TextDecoration.underline,),),
+                                              Text(profile['location']),
                                               SizedBox(width: 22,)
                                             ],
                                           )
@@ -407,7 +426,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ],
                             ),
                             const SizedBox(height: 22),
-                            const Column(
+                             Column(
                               children: [
                                  Row(
                                   children: [
@@ -426,7 +445,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('Field'),
                                           Row(
                                             children: [
-                                              Text('health'),
+                                              Text(profile['field']),
                                               SizedBox(width: 22,)
                                             ],
                                           )
@@ -438,7 +457,7 @@ class _ProfileViewState extends State<ProfileView> {
                               ],
                             ),
                             const SizedBox(height: 22),
-                            const Column(
+                             Column(
                               children: [
                                  Row(
                                   children: [
@@ -457,7 +476,7 @@ class _ProfileViewState extends State<ProfileView> {
                                           Text('experiences'),
                                           Row(
                                             children: [
-                                              Text('3 yrs'),
+                                              Text('${profile["experience"]} yrs'),
                                               SizedBox(width: 22,)
                                             ],
                                           )
